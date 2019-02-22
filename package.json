@@ -1,6 +1,6 @@
 {
   "name": "decorator-memoize-one",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple decorator for caching the result of a function based on the most recent arguments",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
