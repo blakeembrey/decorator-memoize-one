@@ -20,6 +20,17 @@ describe("decorator memoize one", () => {
     expect(test.i).toEqual(1);
   });
 
+  it("should memoize each class instance", () => {
+    class Test {
+      @memoizeOne
+      random() {
+        return Math.random()
+      }
+    }
+
+    expect(new Test().random()).not.toEqual(new Test().random())
+  })
+
   it("should only cache the last function call", () => {
     class Test {
       static i = 0;

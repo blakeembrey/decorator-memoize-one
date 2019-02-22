@@ -3,6 +3,9 @@ export interface MemoizePropertyDescriptor<T, U extends any[], R>
   value?: (this: T, ...args: U) => R;
 }
 
+const PREV = Symbol("memoizeOnePrev");
+const RESULT = Symbol("memoizeOneResult");
+
 /**
  * Memoize the last call to a function.
  */
@@ -12,22 +15,23 @@ export function memoizeOne<T, U extends any[], R>(
   descriptor: MemoizePropertyDescriptor<T, U, R>
 ) {
   const func = descriptor.value;
-  let prev: U | undefined;
-  let result: R | undefined;
 
   if (typeof func !== "function") {
     throw new TypeError("Property descriptor expected to be a function");
   }
 
-  descriptor.value = function(this: T, ...args: U) {
-    const shouldUpdate = prev === undefined || !equal(prev, args);
+  descriptor.value = function memoizeOne(
+    this: T & { [PREV]?: U; [RESULT]?: R },
+    ...args: U
+  ) {
+    const shouldUpdate = this[PREV] === undefined || !equal(this[PREV]!, args);
 
     if (shouldUpdate) {
-      prev = args;
-      result = func.apply(this, args);
+      this[PREV] = args;
+      this[RESULT] = func.apply(this, args);
     }
 
-    return result!;
+    return this[RESULT]!;
   };
 }
 
