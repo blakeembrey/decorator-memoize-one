@@ -3,9 +3,6 @@ export interface MemoizePropertyDescriptor<T, U extends any[], R>
   value?: (this: T, ...args: U) => R;
 }
 
-const PREV = Symbol("memoizeOnePrev");
-const RESULT = Symbol("memoizeOneResult");
-
 /**
  * Memoize the last call to a function.
  */
@@ -20,6 +17,10 @@ export function memoizeOne<T, U extends any[], R>(
     throw new TypeError("Property descriptor expected to be a function");
   }
 
+  // Track unique symbols per class and method.
+  const PREV = Symbol(`memoizePrev[${func.name}]`);
+  const RESULT = Symbol(`memoizeResult[${func.name}]`);
+
   descriptor.value = function memoizeOne(
     this: T & { [PREV]?: U; [RESULT]?: R },
     ...args: U
@@ -27,8 +28,8 @@ export function memoizeOne<T, U extends any[], R>(
     const shouldUpdate = this[PREV] === undefined || !equal(this[PREV]!, args);
 
     if (shouldUpdate) {
-      this[PREV] = args;
       this[RESULT] = func.apply(this, args);
+      this[PREV] = args;
     }
 
     return this[RESULT]!;
